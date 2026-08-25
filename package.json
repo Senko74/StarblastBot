@@ -1,0 +1,25 @@
+{
+  "name": "starblast-bot",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000S\u0000t\u0000a\u0000r\u0000b\u0000l\u0000a\u0000s\u0000t\u0000B\u0000o\u0000t\u0000\r\u0000 \u0000",
+  "keywords": [],
+  "homepage": "https://github.com/Senko74/StarblastBot#readme",
+  "bugs": {
+    "url": "https://github.com/Senko74/StarblastBot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Senko74/StarblastBot.git"
+  },
+  "license": "ISC",
+  "author": "Senko",
+  "type": "commonjs",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {}
+}
