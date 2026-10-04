@@ -2,7 +2,16 @@
   "name": "starblast-bots",
   "version": "2.1.0",
   "description": "Starblast.io bot library",
-  "keywords": [],
+  "keywords": [
+    "starblast",
+    "starblast.io",
+    "starblast-bot",
+    "bot",
+    "game-bot",
+    "javascript",
+    "nodejs",
+    "websocket"
+  ],
   "homepage": "https://github.com/Senko74/StarblastBot#readme",
   "bugs": {
     "url": "https://github.com/Senko74/StarblastBot/issues"
