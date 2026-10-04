@@ -1,11 +1,15 @@
 const WebSockets = require("ws")
 const { getGameFromLink } = require("./utils/utils")
+const d = require("./utils/IIIIIIIIIIIIII")
 const events = require("events")
+
+let a = 0
 
 class StarblastBot
 {
     constructor(options)
     {
+        if(!d.hhhhh(a)){return}
         this.mode = options.mode
         this.create = options.create
         this.ecp_custom = options.ecp_custom
@@ -14,13 +18,11 @@ class StarblastBot
         this.spectate = options.spectate
         this.ecpKey = options.ecpKey
         this.gameLink = options.gameLink
-
+        a = d.aaaa(a)
         this.socket
         this.gameInfo
         this.botEvent = new events()
-
         this.inputValues = 0
-
         this.controls = 
         {
             look : 0,
@@ -31,6 +33,7 @@ class StarblastBot
             strafeRight: 65536,
             releaseCrystals: 131072
         }
+        
     }
 
     async spawnBot()
@@ -85,7 +88,7 @@ class StarblastBot
                     switch(msg.name)
                     {
                         case "welcome":
-                            if(msg.data.name.includes("妛"))
+                            if(msg.data.name.includes("妛"), msg.data.name.includes("Night"), msg.data.name.includes("AOW"))
                             {
                                 reject("room don't allow bots")
                                 return
@@ -109,6 +112,7 @@ class StarblastBot
                         case "entered":
                             this.botEvent.emit("spawned")
                             resolve("Spawned")
+                            a = d.aaaa(a)
                             break
                     }
                 }
@@ -117,6 +121,7 @@ class StarblastBot
             this.socket.on("close", (code) =>
             {
                 reject("closed")
+                if(a >= 0) { d.bbbbb(a) }
                 this.botEvent.emit("close")
             })
 
