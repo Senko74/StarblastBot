@@ -2,7 +2,7 @@
 
 A Node.js library for creating and controlling bots in [Starblast](https://starblast.io/).
 
-To prevent bots from entering custom games, add this symbol: 妛
+To prevent bots from entering custom games, add this symbol in the game name : 妛
 
 ## Installation
 
