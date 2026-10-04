@@ -10,7 +10,7 @@ const bot = new StarblastBot(
         hue : 31,
         spectate : false,
         ecpKey : "00000-00000",
-        gameLink : "https://starblast.io/#1092@51.255.91.80:3017"
+        gameLink : "https://starblast.io/#2606@51.255.91.80:3016"
     },
     
 )
@@ -33,11 +33,19 @@ async function main()
 
     // Make the bot stop the inputs and looking with an angle of 0 degrees
     bot.control(["look"], 0)
-    
-    // Make the bot leave the game
-    bot.leave()
-
 }
+
+bot.botEvent.on("dead", (data) =>
+{
+    console.log("bot dead", data)
+    // Make the bot respawn
+    bot.respawn()
+    // If the bot have more than 3 deaths he leave the game, ragequit
+    if(bot.deaths >= 3)
+    {
+        bot.leave()
+    }
+})
 
 main()
 

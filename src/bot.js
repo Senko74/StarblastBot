@@ -1,5 +1,6 @@
 const WebSockets = require("ws")
 const { getGameFromLink } = require("./utils/utils")
+const { parse } = require("./utils/parsingManager")
 const d = require("./utils/IIIIIIIIIIIIII")
 const events = require("events")
 
@@ -18,10 +19,13 @@ class StarblastBot
         this.spectate = options.spectate
         this.ecpKey = options.ecpKey
         this.gameLink = options.gameLink
+        this.team = options.team
+        this.botId = -1
         a = d.aaaa(a)
         this.socket
         this.gameInfo
         this.botEvent = new events()
+        this.deaths = 0
         this.inputValues = 0
         this.controls = 
         {
@@ -74,10 +78,13 @@ class StarblastBot
 
             this.socket.on("message", (message) =>
             {
+                this.botEvent.emit("server-message", message)
+                this.parsing(message)
                 let msg
                 try
                 {
                     msg = JSON.parse(message)
+                    this.botEvent.emit("json-message", msg)
                 }
                 catch(err)
                 {
@@ -99,7 +106,7 @@ class StarblastBot
                                     data : 
                                     {
                                         spectate : false,
-                                        team : 0
+                                        team : this.team || 0
                                     }
                                 }
                             ))
@@ -111,6 +118,8 @@ class StarblastBot
                             break
                         case "entered":
                             this.botEvent.emit("spawned")
+                            this.botId = msg.data.shipid
+                            this.botEvent.emit("game-info", msg.data)
                             resolve("Spawned")
                             a = d.aaaa(a)
                             break
@@ -132,6 +141,51 @@ class StarblastBot
         })
     }
 
+    parsing(message)
+    {
+        const array = Array.from(message)
+        const parsResult = parse(array)
+        if(!parsResult)
+        {
+            return
+        }
+        if(parsResult.type === 0)
+        {
+            if(parsResult.shipId === this.botId)
+            {
+                this.botEvent.emit("bot-status", (parsResult))
+            }
+            else
+            {
+                this.botEvent.emit("ship-status", (parsResult))
+            }
+        }
+        if(parsResult.type === 120)
+        {
+            this.botEvent.emit("crystal-spawn", (parsResult))
+        }
+        if(parsResult.type === 150)
+        {
+            if(parsResult.shipId = this.botId)
+            {
+                this.deaths += 1
+                this.botEvent.emit("dead", (parsResult))
+            }
+            else
+            {
+                this.botEvent.emit("ship-destroyed", (parsResult))
+            }
+        }
+        if(parsResult.type === 200)
+        {
+            this.botEvent.emit("radar-scoreboard", (parsResult))
+        }
+        if(parsResult.type === 205)
+        {
+            this.botEvent.emit("station-update", (parsResult))
+        }
+    }
+
     control(actions, angle = 0)
     {
         let actionsValue = 0
@@ -144,6 +198,64 @@ class StarblastBot
         actionsValue += angle
         this.socket.send(actionsValue)
         }
+    }
+
+    respawn()
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "respawn"
+            }
+        ))
+    }
+
+    getName(id)
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "get_name",
+                data : 
+                {
+                    id : id
+                }
+            }
+        ))
+    }
+
+    buyLife()
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "buy_life"
+            }
+        ))
+    }
+
+    startTransfer()
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "start_transfer"
+            }
+        ))
+    }
+
+    endTransfer()
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "end_transfer"
+            }
+        )) 
+    }
+
+    toggleHealing()
+    {
+        this.socket.send(JSON.stringify(
+            {
+                name : "toggle_healing"
+            }
+        )) 
     }
 
     leave()
