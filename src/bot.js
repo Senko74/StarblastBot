@@ -135,6 +135,11 @@ class StarblastBot
         this.socket.send(actionsValue)
         }
     }
+
+    leave()
+    {
+        this.socket.close()
+    }
 }
 
 module.exports = { StarblastBot }
