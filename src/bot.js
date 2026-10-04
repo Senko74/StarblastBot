@@ -1,5 +1,5 @@
 const WebSockets = require("ws")
-const { getGameFromLink } = require("./utils")
+const { getGameFromLink } = require("./utils/utils")
 const events = require("events")
 
 class StarblastBot
@@ -85,6 +85,11 @@ class StarblastBot
                     switch(msg.name)
                     {
                         case "welcome":
+                            if(msg.data.name.includes("妛"))
+                            {
+                                reject("room don't allow bots")
+                                return
+                            }
                             this.socket.send(JSON.stringify(
                                 {
                                     name : "enter",

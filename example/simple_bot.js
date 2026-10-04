@@ -10,7 +10,7 @@ const bot = new StarblastBot(
         hue : 31,
         spectate : false,
         ecpKey : "00000-00000",
-        gameLink : "https://starblast.io#0000"
+        gameLink : "https://starblast.io/#1092@51.255.91.80:3017"
     },
     
 )
@@ -18,8 +18,15 @@ const bot = new StarblastBot(
 async function main()
 {
     // Make the bot join the game
-    await bot.spawnBot()
-    console.log("spawned")
+    try
+    {
+        await bot.spawnBot()
+        console.log("spawned")
+    }
+    catch(error)
+    {
+        console.log(error)
+    }
     
     // Make the bot shoot with an angle of 0 degrees and straw left
     bot.control(["shoot", "strafeLeft"], 0)

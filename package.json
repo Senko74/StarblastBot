@@ -23,7 +23,7 @@
   "license": "ISC",
   "author": "Senko",
   "type": "commonjs",
-  "main": "bot.js",
+  "main": "./src/bot.js",
   "dependencies": {
     "ws": "^8.22.0"
   }

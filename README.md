@@ -1,42 +1,21 @@
-# Starblast Bots
+# starblast-bots
 
-Starblast Bots is a JavaScript library for creating and controlling bots for the web game [Starblast.io](https://starblast.io/).
-
-It provides an easy way to connect bots to Starblast games, control their movement and actions, and interact with the game through a simple Node.js API.
-
-### V1.0.1 Beta — Report any issues or bugs in the [Issues](https://github.com/Senko74/StarblastBot/issues) tab.
+A Node.js library for creating and controlling bots in [Starblast](https://starblast.io/).
 
 ## Installation
 
-To install Starblast Bots, you will need [Node.js](https://nodejs.org/) installed on your system.
-
-Then, run:
+Install the package with npm:
 
 ```bash
 npm install starblast-bots
 ```
 
-## Features
-
-* Connect bots to Starblast.io games
-* Join existing games using a game link
-* Create bots with custom names and hues
-* Support for different game modes
-* Control bot movement and actions
-* Combine multiple controls into a single input
-* Control the bot's aiming angle
-* Detect when a bot has spawned
-* Detect when a bot disconnects
-* Easily leave a game
-* Simple event-based API
-* Pure JavaScript / Node.js
-* Lightweight API designed for bot development
-
-## Basic Usage
+## Basic example
 
 ```js
 const { StarblastBot } = require("starblast-bots")
 
+// The bot's information
 const bot = new StarblastBot({
     mode: "survival",
     create: false,
@@ -44,20 +23,22 @@ const bot = new StarblastBot({
     hue: 31,
     spectate: false,
     ecpKey: "00000-00000",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
+    gameLink: "https://starblast.io/#1092@51.255.91.80:3017"
 })
 
-async function main()
-{
-    // Join the game
-    await bot.spawnBot()
+async function main() {
+    // Make the bot join the game
+    try {
+        await bot.spawnBot()
+        console.log("spawned")
+    } catch (error) {
+        console.log(error)
+    }
 
-    console.log("Bot spawned")
-
-    // Shoot and strafe left
+    // Shoot while strafing left
     bot.control(["shoot", "strafeLeft"], 0)
 
-    // Look at 0 degrees
+    // Stop the inputs and look at an angle of 0 degrees
     bot.control(["look"], 0)
 
     // Leave the game
@@ -67,184 +48,82 @@ async function main()
 main()
 ```
 
-## Creating a Bot
+## Configuration
 
-A bot is created by passing a configuration object to `StarblastBot`.
+A bot is created by passing an options object to `StarblastBot`:
 
 ```js
 const bot = new StarblastBot({
     mode: "survival",
     create: false,
-    name: "MyBot",
+    name: "senko",
     hue: 31,
     spectate: false,
     ecpKey: "00000-00000",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
+    gameLink: "https://starblast.io/#1092@51.255.91.80:3017"
 })
 ```
 
-### Bot Options
+### Options
 
-| **Option**   | **Type**  | **Description**                 |
-| ------------ | --------- | ------------------------------- |
-| `mode`       | `string`  | Game mode                       |
-| `create`     | `boolean` | Whether to create a new game    |
-| `name`       | `string`  | Bot's player name               |
-| `hue`        | `number`  | Bot's ship hue                  |
-| `spectate`   | `boolean` | Whether the bot should spectate |
-| `ecpKey`     | `string`  | ECP key used by the bot         |
-| `ecp_custom` | `object`  | Custom ECP configuration        |
-| `gameLink`   | `string`  | Starblast game link             |
+| Option     | Type      | Description                                     |
+| ---------- | --------- | ----------------------------------------------- |
+| `mode`     | `string`  | The Starblast game mode.                        |
+| `create`   | `boolean` | Whether the bot should create a game.           |
+| `name`     | `string`  | The name displayed by the bot.                  |
+| `hue`      | `number`  | The bot's hue/color value.                      |
+| `spectate` | `boolean` | Whether the bot should spectate.                |
+| `ecpKey`   | `string`  | ECP key used by the bot.                        |
+| `gameLink` | `string`  | Link to the Starblast game the bot should join. |
 
-## Connection Flow
+## Spawning a bot
 
-The typical bot lifecycle follows this sequence:
-
-1. Create a `StarblastBot` instance
-2. Call `spawnBot()`
-3. Wait for the bot to enter the game
-4. Control the bot using `control()`
-5. Leave the game using `leave()`
-
-Example:
+Use `spawnBot()` to make the bot connect to the configured game:
 
 ```js
-const bot = new StarblastBot({
-    mode: "survival",
-    name: "MyBot",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
-})
-
 await bot.spawnBot()
-
-bot.control(["thrust"], 0)
-
-bot.leave()
 ```
 
-## Controlling the Bot
-
-The `control()` method allows you to send one or multiple controls to the bot.
+Because `spawnBot()` is asynchronous, it should normally be used with `await`:
 
 ```js
-bot.control(["shoot"], 0)
-```
-
-Multiple controls can be combined:
-
-```js
-bot.control(["thrust", "shoot", "strafeLeft"], 45)
-```
-
-The second argument is the aiming angle.
-
-```js
-bot.control(["shoot"], 90)
-```
-
-### Available Controls
-
-| **Control**       | **Description**             |
-| ----------------- | --------------------------- |
-| `look`            | Look at the specified angle |
-| `thrust`          | Thrust forward              |
-| `shoot`           | Shoot                       |
-| `glide`           | Glide                       |
-| `strafeLeft`      | Strafe left                 |
-| `strafeRight`     | Strafe right                |
-| `releaseCrystals` | Release crystals            |
-
-### Combining Controls
-
-Controls can be combined in the same call:
-
-```js
-bot.control(
-    ["thrust", "shoot", "strafeLeft"],
-    45
-)
-```
-
-This allows you to control several inputs simultaneously without requiring a separate method for every possible combination.
-
-## Events
-
-Starblast Bots uses an EventEmitter through `bot.botEvent`.
-
-### `spawned`
-
-Emitted when the bot successfully enters the game.
-
-```js
-bot.botEvent.on("spawned", () =>
-{
-    console.log("Bot spawned!")
-})
-```
-
-### `close`
-
-Emitted when the bot's WebSocket connection closes.
-
-```js
-bot.botEvent.on("close", () =>
-{
-    console.log("Bot disconnected!")
-})
-```
-
-## Event Example
-
-```js
-const { StarblastBot } = require("starblast-bots")
-
-const bot = new StarblastBot({
-    mode: "survival",
-    name: "MyBot",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
-})
-
-bot.botEvent.on("spawned", () =>
-{
-    console.log("Bot successfully joined the game")
-
-    bot.control(["shoot"], 0)
-})
-
-bot.botEvent.on("close", () =>
-{
-    console.log("Bot disconnected")
-})
-
-async function main()
-{
+try {
     await bot.spawnBot()
+    console.log("Bot spawned successfully")
+} catch (error) {
+    console.error(error)
 }
-
-main()
 ```
 
-## Leaving a Game
+## Controlling the bot
 
-Use `leave()` to close the bot's connection to the game.
+The `control()` method can be used to send controls to the bot.
+
+### Shooting and strafing
+
+```js
+bot.control(["shoot", "strafeLeft"], 0)
+```
+
+This makes the bot shoot while strafing left and looking at an angle of `0` degrees.
+
+### Looking
+
+```js
+bot.control(["look"], 0)
+```
+
+This changes the bot's look angle to `0` degrees while stopping the other controls.
+
+## Leaving the game
+
+Use `leave()` to disconnect the bot from the game:
 
 ```js
 bot.leave()
 ```
 
-Example:
-
-```js
-await bot.spawnBot()
-
-console.log("Bot is playing")
-
-bot.control(["thrust", "shoot"], 0)
-
-bot.leave()
-```
-
-## Full Example
+## Complete example
 
 ```js
 const { StarblastBot } = require("starblast-bots")
@@ -256,115 +135,99 @@ const bot = new StarblastBot({
     hue: 31,
     spectate: false,
     ecpKey: "00000-00000",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
+    gameLink: "https://starblast.io/#1092@51.255.91.80:3017"
 })
 
-bot.botEvent.on("spawned", () =>
-{
-    console.log("Bot spawned!")
+async function main() {
+    try {
+        await bot.spawnBot()
+        console.log("spawned")
+    } catch (error) {
+        console.error(error)
+        return
+    }
 
-    // Shoot and strafe left
     bot.control(["shoot", "strafeLeft"], 0)
 
-    // Look at 90 degrees
-    bot.control(["look"], 90)
-})
+    bot.control(["look"], 0)
 
-bot.botEvent.on("close", () =>
-{
-    console.log("Bot disconnected!")
-})
-
-async function main()
-{
-    try
-    {
-        await bot.spawnBot()
-    }
-    catch(error)
-    {
-        console.error("Failed to spawn bot:", error)
-    }
+    bot.leave()
 }
 
 main()
 ```
 
-## API
+## Requirements
 
-### `new StarblastBot(options)`
+* Node.js
+* npm
+* A valid Starblast game link
+* An ECP key if required by the game/bot configuration
 
-Creates a new bot instance.
+## Project structure
 
-```js
-const bot = new StarblastBot({
-    mode: "survival",
-    name: "MyBot",
-    gameLink: "https://starblast.io#6147@195.201.89.106:3010"
-})
+A minimal project can look like this:
+
+```text
+my-starblast-bot/
+├── node_modules/
+├── package.json
+├── package-lock.json
+└── index.js
 ```
 
-### `bot.spawnBot()`
+Install the package:
 
-Connects the bot to the specified Starblast game.
+```bash
+npm install starblast-bots
+```
+
+Then put your bot code in `index.js` and run:
+
+```bash
+node index.js
+```
+
+## API
+
+### `StarblastBot`
+
+Creates a new Starblast bot.
+
+```js
+new StarblastBot(options)
+```
+
+### `spawnBot()`
+
+Connects the bot to the configured Starblast game.
 
 ```js
 await bot.spawnBot()
 ```
 
-Returns a `Promise` that resolves when the bot has successfully entered the game.
+### `control(inputs, angle)`
 
-### `bot.control(actions, angle)`
+Controls the bot.
 
-Sends controls to the bot.
+```js
+bot.control(["shoot"], 0)
+```
+
+Multiple inputs can be provided:
 
 ```js
 bot.control(["shoot", "strafeLeft"], 0)
 ```
 
-### `bot.leave()`
+### `leave()`
 
-Closes the bot's connection.
+Disconnects the bot from the game.
 
 ```js
 bot.leave()
 ```
 
-### `bot.botEvent`
-
-The EventEmitter used to listen for bot events.
-
-```js
-bot.botEvent.on("spawned", () =>
-{
-    console.log("Spawned")
-})
-```
-
-## Requirements
-
-* Node.js
-* A valid Starblast.io game link
-* Internet connection
-* An ECP key may be required for some functionality
-
-## Examples
-
-More examples can be added to the `examples` directory as the library evolves.
-
-Suggested examples:
-
-* `simple-bot.js` — Basic bot connection and controls
-* `movement-bot.js` — Bot movement and combined controls
-* `event-bot.js` — Using bot events
-* `create-game.js` — Creating a game
-
-## Support
-
-If you find a bug or have a suggestion, open an issue on GitHub:
-
-[GitHub Issues](https://github.com/Senko74/StarblastBot/issues)
-
 ## License
 
-ISC
+Add your project's license information here.
