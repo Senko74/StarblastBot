@@ -1,4 +1,4 @@
-function parse(array)
+function parse(array, gameInfo)
 {
     if(array[0] === 0)
     {
@@ -132,7 +132,7 @@ function parse(array)
 
     if(array[0] === 200 || array[0] === 201)
     {
-        return parsePacket200(array)
+        return parsePacket200(array, gameInfo.size)
     }
 
     if(array[0] === 205)
@@ -196,21 +196,21 @@ function parsePacket0(bytes)
         type : view.getUint8(0),
         shipId : view.getUint8(1),
         hue256 : view.getUint8(3),
-        serverTick : view.getUint32(4),
-        lastTick : view.getUint32(8),
-        angle : view.getUint16(12),
-        x : view.getFloat32(16),
-        y : view.getFloat32(20),
-        vx : view.getFloat32(24),
-        vy : view.getFloat32(28),
-        r : view.getFloat32(32),
-        angularVelocity : view.getFloat32(36),
-        rank : view.getUint8(41),
-        shield : view.getUint16(42),
-        generator : view.getUint16(44),
-        crystals : view.getUint16(46),
-        score : view.getUint32(48),
-        levels : view.getUint32(52)
+        serverTick : view.getUint32(4, true),
+        lastTick : view.getUint32(8, true),
+        angle : view.getUint16(12, true),
+        x : view.getFloat32(16, true),
+        y : view.getFloat32(20, true),
+        vx : view.getFloat32(24, true),
+        vy : view.getFloat32(28, true),
+        r : view.getFloat32(32, true),
+        angularVelocity : view.getFloat32(36, true),
+        rank : view.getUint8(41, true),
+        shield : view.getUint16(42, true),
+        generator : view.getUint16(44, true),
+        crystals : view.getUint16(46, true),
+        score : view.getUint32(48, true),
+        levels : view.getUint32(52, true)
     }
 }
 
@@ -633,19 +633,27 @@ function parsePacket190(bytes)
 }
 
 // Parse radar ships and scoreboard
-function parsePacket200(bytes)
+function parsePacket200(bytes, mapSize)
 {
     const buffer = Uint8Array.from(bytes)
     const view = new DataView(buffer.buffer)
 
     const ships = []
 
+
     for(let offset = 2; offset + 8 <= buffer.length; offset += 8)
     {
+        const nx = view.getInt8(offset + 1)
+        const ny = view.getInt8(offset + 2)
+        const x = (nx / 128) * (mapSize/2)
+        const y = (ny / 128) * (mapSize/2)
         ships.push({
             shipId : view.getUint8(offset),
+            player_name : "",
             nx : view.getInt8(offset + 1),
             ny : view.getInt8(offset + 2),
+            x : x,
+            y : y,
             flags : view.getUint8(offset + 3),
             scoreModel : view.getUint32(offset + 4)
         })

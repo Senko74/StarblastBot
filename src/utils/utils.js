@@ -160,75 +160,7 @@ async function vanillaCustomParty(gameLink)
     return null
 }
 
-function parsePacket0(bytes)
-{
-    const buffer = Uint8Array.from(bytes)
-    const view = new DataView(buffer.buffer)
 
-    const playerInfo = 
-    {
-        packetType : 0,
-        shipId : view.getUint8(1),
-        flags: view.getUint8(2),
-        hue: view.getUint8(3),
-        serverTick: view.getUint32(4, true),
-        lastTick: view.getUint32(8, true),
-        angle: view.getUint16(12, true),
-        typeFlags: view.getUint16(14, true),
-        x: view.getFloat32(16, true),
-        y: view.getFloat32(20, true),
-        speedX: view.getFloat32(24, true),
-        speedY: view.getFloat32(28, true),
-        rotation: view.getFloat32(32, true),
-        angularVelocity: view.getFloat32(36, true),
-        stun: view.getUint8(40),
-        rank: view.getUint8(41),
-        shield: view.getUint16(42, true),
-        energy: view.getUint16(44, true),
-        crystals: view.getUint16(46, true),
-        score: view.getUint32(48, true),
-        levels: view.getUint32(52, true)
-    }
-        
-    return playerInfo
-}
 
-function parsePacket101(bytes)
-{
-    const buffer = Uint8Array.from(bytes)
-    const view = new DataView(buffer.buffer)
 
-    const laserHit =
-    {
-        packetType : 101,
-        type: view.getUint8(0),
-        laserIndex: view.getUint16(2, true),
-        x: view.getFloat32(4, true),
-        y: view.getFloat32(8, true),
-        shipId: view.getUint8(12)
-    }
-
-    return laserHit
-}
-
-function parsePacket150(bytes)
-{
-    const killData = 
-    {
-        packetType : 150,
-        killed : bytes[1],
-        killer : bytes[2]
-    }
-    return killData
-}
-
-class vector2
-{
-    constructror(x, y)
-    {
-        this.x = x
-        this.y = y
-    }
-}
-
-module.exports = { getGame, getGameFromLink, parsePacket0, parsePacket101, parsePacket150 }
+module.exports = { getGame, getGameFromLink }

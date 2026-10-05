@@ -1,16 +1,12 @@
 const WebSockets = require("ws")
 const { getGameFromLink } = require("./utils/utils")
 const { parse } = require("./utils/parsingManager")
-const d = require("./utils/IIIIIIIIIIIIII")
 const events = require("events")
-
-let a = 0
 
 class StarblastBot
 {
     constructor(options)
     {
-        if(!d.hhhhh(a)){return}
         this.mode = options.mode
         this.create = options.create
         this.ecp_custom = options.ecp_custom
@@ -20,13 +16,15 @@ class StarblastBot
         this.ecpKey = options.ecpKey
         this.gameLink = options.gameLink
         this.team = options.team
-        this.botId = -1
-        a = d.aaaa(a)
+        this.botId 
         this.socket
         this.gameInfo
+        this.matchInfo
         this.botEvent = new events()
         this.deaths = 0
         this.inputValues = 0
+        this.botData
+        this.playersInfo = []
         this.controls = 
         {
             look : 0,
@@ -95,7 +93,12 @@ class StarblastBot
                     switch(msg.name)
                     {
                         case "welcome":
-                            if(msg.data.name.includes("妛"), msg.data.name.includes("Night"), msg.data.name.includes("AOW"))
+                            this.matchInfo = msg.data
+                            if(
+                                msg.data.name.includes("妛") ||
+                                msg.data.name.includes("Night") ||
+                                msg.data.name.includes("AOW")
+                            )
                             {
                                 reject("room don't allow bots")
                                 return
@@ -117,11 +120,9 @@ class StarblastBot
                             ))
                             break
                         case "entered":
-                            this.botEvent.emit("spawned")
                             this.botId = msg.data.shipid
                             this.botEvent.emit("game-info", msg.data)
-                            resolve("Spawned")
-                            a = d.aaaa(a)
+                            resolve("spawned")
                             break
                     }
                 }
@@ -130,7 +131,6 @@ class StarblastBot
             this.socket.on("close", (code) =>
             {
                 reject("closed")
-                if(a >= 0) { d.bbbbb(a) }
                 this.botEvent.emit("close")
             })
 
@@ -141,19 +141,27 @@ class StarblastBot
         })
     }
 
-    parsing(message)
+    async parsing(message)
     {
         const array = Array.from(message)
-        const parsResult = parse(array)
+        const parsResult = parse(array, this.matchInfo)
         if(!parsResult)
         {
             return
         }
         if(parsResult.type === 0)
         {
+            
             if(parsResult.shipId === this.botId)
             {
+                const firsTSpawn = this.botData
+                this.botData = parsResult
+                if(!firsTSpawn)
+                {
+                    this.botEvent.emit("spawned")
+                }
                 this.botEvent.emit("bot-status", (parsResult))
+                
             }
             else
             {
@@ -179,12 +187,22 @@ class StarblastBot
         if(parsResult.type === 200)
         {
             this.botEvent.emit("radar-scoreboard", (parsResult))
+            this.playersInfo = parsResult.ships
+            for(const player of this.playersInfo)
+            {
+                try
+                {
+                    player.player_name = await this.getName(player.shipId)
+                }
+                catch(err) {  }
+            }
         }
         if(parsResult.type === 205)
         {
             this.botEvent.emit("station-update", (parsResult))
         }
     }
+
 
     control(actions, angle = 0)
     {
@@ -209,9 +227,28 @@ class StarblastBot
         ))
     }
 
-    getName(id)
+    async getName(id)
     {
-        this.socket.send(JSON.stringify(
+        return new Promise((resolve, reject) =>
+        {
+    
+            const onMessage = (message) =>
+            {
+                let msg
+                try
+                {
+                    msg = JSON.parse(message)
+                }
+                catch(err) { return }
+                if(msg.name === "player_name" && msg.data.id === id)
+                {
+                    resolve(msg.data.player_name)
+                    this.socket.off("message", onMessage)
+                    return
+                }
+            }
+            this.socket.on("message", onMessage)
+            this.socket.send(JSON.stringify(
             {
                 name : "get_name",
                 data : 
@@ -219,7 +256,8 @@ class StarblastBot
                     id : id
                 }
             }
-        ))
+            ))
+        })
     }
 
     buyLife()
@@ -258,10 +296,105 @@ class StarblastBot
         )) 
     }
 
+    getDistanceById(shipId)
+    {   
+        if(!this.botData) { return }
+        const playerInfo = this.findPlayerInfoById(shipId)
+        return Math.sqrt((playerInfo.x - this.botData.x)**2 + (playerInfo.y - this.botData.y)**2)
+    }
+
+    getDistanceByName(name)
+    {
+        if(!this.botData) { return }
+        let playerInfo = this.findPlayerInfoByName(name)
+        return Math.sqrt((playerInfo.x - this.botData.x)**2 + (playerInfo.y - this.botData.y)**2)
+    }
+
+    findPlayerInfoById(shipId)
+    {
+        let playerInfo = {}
+        for(const player of this.playersInfo)
+        {
+            if(player.shipId === shipId)
+            {
+                playerInfo = player
+            }
+        }
+        return playerInfo
+    }
+
+    findPlayerInfoByName(name)
+    {
+        let playerInfo = {}
+        for(const player of this.playersInfo)
+        {
+            if(name == player.player_name)
+            {
+                playerInfo = player
+            }
+        }
+        return playerInfo
+    }
+
     leave()
     {
         this.socket.close()
     }
+
+    move(x,y)
+    {
+        let angle = (Math.atan2(y - this.botData.y, x - this.botData.x)*180)/Math.PI
+        const distance = Math.sqrt((x - this.botData.x)**2 + (y - this.botData.y)**2)
+        if(angle < 0)
+        {
+            angle += 360
+        }
+        this.control(["thrust"], angle)
+        if(distance < 35)
+        {
+            this.control(["look"], angle)
+            return true
+        }
+        else
+        {
+            return false
+        }
+    }
+
+    moveTo(x, y)
+    {
+        if(this.moveToInterval)
+        {
+            return
+        }
+        this.moveToInterval = setInterval(() =>
+        {
+            const arrived = this.move(x,y)
+            if(arrived)
+            {
+                clearInterval(this.moveToInterval)
+                this.moveToInterval = null
+            }
+        }, 100)
+    }
+
+    moveToSun()
+    {
+        if(this.moveToInterval)
+        {
+            return
+        }
+        this.moveToInterval = setInterval(() =>
+        {
+            const arrived = this.move(0,0)
+            if(arrived)
+            {
+                clearInterval(this.moveToInterval)
+                this.moveToInterval = null
+            }
+        }, 100)
+    }
+
 }
 
 module.exports = { StarblastBot }
