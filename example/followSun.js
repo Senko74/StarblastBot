@@ -26,6 +26,7 @@ async function bot()
 
     bot.botEvent.on("spawned", () =>
     {
+        // Start moving to the sun
         bot.moveToSun()
 
         bot.botEvent.on("dead", (data) =>
@@ -33,11 +34,13 @@ async function bot()
             console.log("bot dead", data)
             // Make the bot respawn
             bot.respawn()
+            // Make the bot follow the sun
             bot.moveToSun()
         })
     })
 }
 
+// Make 5 bots spawn
 for(let i = 0; i < 5; i ++)
 {
     bot()

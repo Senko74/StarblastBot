@@ -1,12 +1,15 @@
 const WebSockets = require("ws")
 const { getGameFromLink } = require("./utils/utils")
 const { parse } = require("./utils/parsingManager")
+const { SocksProxyAgent } = require("socks-proxy-agent")
 const events = require("events")
 
 class StarblastBot
 {
     constructor(options)
     {
+        this.proxyUrl = options.proxyUrl
+        this.agent = new SocksProxyAgent(this.proxyUrl)
         this.mode = options.mode
         this.create = options.create
         this.ecp_custom = options.ecp_custom
@@ -47,6 +50,7 @@ class StarblastBot
             this.socket = new WebSockets(
                 this.gameInfo.wsUrl,
                 {
+                    agent : this.agent,
                     headers : 
                     {
                         Origin : "https://starblast.io"
